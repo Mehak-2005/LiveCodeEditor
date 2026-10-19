@@ -1,0 +1,625 @@
+[
+  {
+    "questionId": "two-sum",
+    "title": "Two Sum",
+    "description": "Given an array of integers nums and an integer target, return the indices of the two numbers such that they add up to target.",
+    "difficulty": "Easy",
+    "languages": [
+      "python",
+      "java"
+    ],
+    "starterCode": {
+      "python": "def two_sum(nums, target):\n    # Write your solution here\n    pass\n",
+      "java": "import java.util.*;\n\npublic class Main {\n\n    public static int[] twoSum(int[] nums, int target) {\n        // Write your solution here\n        return new int[]{};\n    }\n\n    public static void main(String[] args) {\n        // Your code will be tested by the backend\n    }\n\n}\n"
+    },
+    "functionSignature": {
+      "python": "two_sum(nums, target)",
+      "java": "twoSum(int[] nums, int target)"
+    },
+    "questionType": "function",
+    "testCases": [
+      {
+        "id": 1,
+        "input": {
+          "nums": [2, 7, 11, 15],
+          "target": 9
+        },
+        "expectedOutput": [0, 1]
+      },
+      {
+        "id": 2,
+        "input": {
+          "nums": [3, 2, 4],
+          "target": 6
+        },
+        "expectedOutput": [1, 2]
+      },
+      {
+        "id": 3,
+        "input": {
+          "nums": [3, 3],
+          "target": 6
+        },
+        "expectedOutput": [0, 1]
+      },
+      {
+        "id": 4,
+        "input": {
+          "nums": [1, 5, 8, 10],
+          "target": 13
+        },
+        "expectedOutput": [1, 2]
+      }
+    ]
+  },
+  {
+    "questionId": "reverse-string",
+    "title": "Reverse String",
+    "description": "Given a string s, return the reversed string.",
+    "difficulty": "Easy",
+    "languages": [
+      "python",
+      "java"
+    ],
+    "starterCode": {
+      "python": "def reverse_string(s):\n    # Write your solution here\n    pass\n",
+      "java": "public class Main {\n\n    public static String reverseString(String s) {\n        // Write your solution here\n        return \"\";\n    }\n\n    public static void main(String[] args) {\n        // Your code will be tested by the backend\n    }\n\n}\n"
+    },
+    "functionSignature": {
+      "python": "reverse_string(s)",
+      "java": "reverseString(String s)"
+    },
+    "questionType": "function",
+    "testCases": [
+      {
+        "id": 1,
+        "input": {
+          "s": "hello"
+        },
+        "expectedOutput": "olleh"
+      },
+      {
+        "id": 2,
+        "input": {
+          "s": "world"
+        },
+        "expectedOutput": "dlrow"
+      },
+      {
+        "id": 3,
+        "input": {
+          "s": "OpenAI"
+        },
+        "expectedOutput": "IAnepO"
+      },
+      {
+        "id": 4,
+        "input": {
+          "s": "12345"
+        },
+        "expectedOutput": "54321"
+      }
+    ]
+  },
+  {
+    "questionId": "binary-search",
+    "title": "Binary Search",
+    "description": "Given a sorted array of integers nums and an integer target, return the index of target if it exists in the array. Otherwise, return -1.",
+    "difficulty": "Easy",
+    "languages": [
+      "python",
+      "java"
+    ],
+    "starterCode": {
+      "python": "def binary_search(nums, target):\n    # Write your solution here\n    return -1\n",
+      "java": "public class Main {\n\n    public static int binarySearch(int[] nums, int target) {\n        // Write your solution here\n        return -1;\n    }\n\n    public static void main(String[] args) {\n        // Your code will be tested by the backend\n    }\n\n}\n"
+    },
+    "functionSignature": {
+      "python": "binary_search(nums, target)",
+      "java": "binarySearch(int[] nums, int target)"
+    },
+    "questionType": "function",
+    "execution": {
+      "methodName": "binarySearch",
+      "parameterTypes": [
+        "int[]",
+        "int"
+      ],
+      "inputFields": [
+        "nums",
+        "target"
+      ],
+      "returnType": "int"
+    },
+    "testCases": [
+      {
+        "id": 1,
+        "input": {
+          "nums": [1, 3, 5, 7, 9],
+          "target": 5
+        },
+        "expectedOutput": 2
+      },
+      {
+        "id": 2,
+        "input": {
+          "nums": [2, 4, 6, 8, 10],
+          "target": 8
+        },
+        "expectedOutput": 3
+      },
+      {
+        "id": 3,
+        "input": {
+          "nums": [1, 4, 7, 10],
+          "target": 6
+        },
+        "expectedOutput": -1
+      },
+      {
+        "id": 4,
+        "input": {
+          "nums": [10, 20, 30, 40, 50],
+          "target": 10
+        },
+        "expectedOutput": 0
+      }
+    ]
+  },
+  {
+    "questionId": "valid-parentheses",
+    "title": "Valid Parentheses",
+    "description": "Given a string containing brackets, determine whether the brackets are correctly matched and properly nested.",
+    "difficulty": "Easy",
+    "languages": [
+      "python",
+      "java"
+    ],
+    "starterCode": {
+      "python": "def is_valid_parentheses(s):\n    # Write your solution here\n    return False\n",
+      "java": "public class Main {\n\n    public static boolean isValidParentheses(String s) {\n        // Write your solution here\n        return false;\n    }\n\n    public static void main(String[] args) {\n        // Your code will be tested by the backend\n    }\n\n}\n"
+    },
+    "functionSignature": {
+      "python": "is_valid_parentheses(s)",
+      "java": "isValidParentheses(String s)"
+    },
+    "questionType": "function",
+    "execution": {
+      "methodName": "isValidParentheses",
+      "parameterTypes": [
+        "String"
+      ],
+      "inputFields": [
+        "s"
+      ],
+      "returnType": "boolean"
+    },
+    "testCases": [
+      {
+        "id": 1,
+        "input": {
+          "s": "()"
+        },
+        "expectedOutput": true
+      },
+      {
+        "id": 2,
+        "input": {
+          "s": "()[]{}"
+        },
+        "expectedOutput": true
+      },
+      {
+        "id": 3,
+        "input": {
+          "s": "(]"
+        },
+        "expectedOutput": false
+      },
+      {
+        "id": 4,
+        "input": {
+          "s": "([{}])"
+        },
+        "expectedOutput": true
+      }
+    ]
+  },
+  {
+    "questionId": "merge-sorted-arrays",
+    "title": "Merge Two Sorted Arrays",
+    "description": "Given two sorted arrays of integers, return a single sorted array containing all elements from both arrays.",
+    "difficulty": "Easy",
+    "languages": [
+      "python",
+      "java"
+    ],
+    "starterCode": {
+      "python": "def merge_sorted_arrays(nums1, nums2):\n    # Write your solution here\n    return []\n",
+      "java": "public class Main {\n\n    public static int[] mergeSortedArrays(int[] nums1, int[] nums2) {\n        // Write your solution here\n        return new int[]{};\n    }\n\n    public static void main(String[] args) {\n        // Your code will be tested by the backend\n    }\n\n}\n"
+    },
+    "functionSignature": {
+      "python": "merge_sorted_arrays(nums1, nums2)",
+      "java": "mergeSortedArrays(int[] nums1, int[] nums2)"
+    },
+    "questionType": "function",
+    "execution": {
+      "methodName": "mergeSortedArrays",
+      "parameterTypes": [
+        "int[]",
+        "int[]"
+      ],
+      "inputFields": [
+        "nums1",
+        "nums2"
+      ],
+      "returnType": "int[]"
+    },
+    "testCases": [
+      {
+        "id": 1,
+        "input": {
+          "nums1": [1, 3, 5],
+          "nums2": [2, 4, 6]
+        },
+        "expectedOutput": [1, 2, 3, 4, 5, 6]
+      },
+      {
+        "id": 2,
+        "input": {
+          "nums1": [1, 2],
+          "nums2": [3, 4]
+        },
+        "expectedOutput": [1, 2, 3, 4]
+      },
+      {
+        "id": 3,
+        "input": {
+          "nums1": [2, 5, 8],
+          "nums2": [1, 3, 7]
+        },
+        "expectedOutput": [1, 2, 3, 5, 7, 8]
+      },
+      {
+        "id": 4,
+        "input": {
+          "nums1": [],
+          "nums2": [1, 2, 3]
+        },
+        "expectedOutput": [1, 2, 3]
+      }
+    ]
+  },
+  {
+    "questionId": "maximum-subarray",
+    "title": "Maximum Subarray",
+    "description": "Given an integer array nums, find the contiguous subarray with the largest sum and return its sum.",
+    "difficulty": "Easy",
+    "languages": [
+      "python",
+      "java"
+    ],
+    "starterCode": {
+      "python": "def max_subarray(nums):\n    # Write your solution here\n    return 0\n",
+      "java": "public class Main {\n\n    public static int maxSubarray(int[] nums) {\n        // Write your solution here\n        return 0;\n    }\n\n    public static void main(String[] args) {\n        // Your code will be tested by the backend\n    }\n\n}\n"
+    },
+    "functionSignature": {
+      "python": "max_subarray(nums)",
+      "java": "maxSubarray(int[] nums)"
+    },
+    "questionType": "function",
+    "execution": {
+      "methodName": "maxSubarray",
+      "parameterTypes": [
+        "int[]"
+      ],
+      "inputFields": [
+        "nums"
+      ],
+      "returnType": "int"
+    },
+    "testCases": [
+      {
+        "id": 1,
+        "input": {
+          "nums": [-2, 1, -3, 4, -1, 2, 1, -5, 4]
+        },
+        "expectedOutput": 6
+      },
+      {
+        "id": 2,
+        "input": {
+          "nums": [1, 2, 3, 4]
+        },
+        "expectedOutput": 10
+      },
+      {
+        "id": 3,
+        "input": {
+          "nums": [-5, -2, -8]
+        },
+        "expectedOutput": -2
+      },
+      {
+        "id": 4,
+        "input": {
+          "nums": [5]
+        },
+        "expectedOutput": 5
+      }
+    ]
+  },
+  {
+    "questionId": "palindrome-number",
+    "title": "Palindrome Number",
+    "description": "Given an integer x, return true if x reads the same forward and backward. Otherwise, return false.",
+    "difficulty": "Easy",
+    "languages": [
+      "python",
+      "java"
+    ],
+    "starterCode": {
+      "python": "def is_palindrome_number(x):\n    # Write your solution here\n    return False\n",
+      "java": "public class Main {\n\n    public static boolean isPalindromeNumber(int x) {\n        // Write your solution here\n        return false;\n    }\n\n    public static void main(String[] args) {\n        // Your code will be tested by the backend\n    }\n\n}\n"
+    },
+    "functionSignature": {
+      "python": "is_palindrome_number(x)",
+      "java": "isPalindromeNumber(int x)"
+    },
+    "questionType": "function",
+    "execution": {
+      "methodName": "isPalindromeNumber",
+      "parameterTypes": [
+        "int"
+      ],
+      "inputFields": [
+        "x"
+      ],
+      "returnType": "boolean"
+    },
+    "testCases": [
+      {
+        "id": 1,
+        "input": {
+          "x": 121
+        },
+        "expectedOutput": true
+      },
+      {
+        "id": 2,
+        "input": {
+          "x": -121
+        },
+        "expectedOutput": false
+      },
+      {
+        "id": 3,
+        "input": {
+          "x": 10
+        },
+        "expectedOutput": false
+      },
+      {
+        "id": 4,
+        "input": {
+          "x": 12321
+        },
+        "expectedOutput": true
+      }
+    ]
+  },
+  {
+    "questionId": "fizz-buzz",
+    "title": "Fizz Buzz",
+    "description": "Given an integer n, return an array of strings from 1 to n. For multiples of 3 return Fizz, for multiples of 5 return Buzz, and for multiples of both return FizzBuzz.",
+    "difficulty": "Easy",
+    "languages": [
+      "python",
+      "java"
+    ],
+    "starterCode": {
+      "python": "def fizz_buzz(n):\n    # Write your solution here\n    return []\n",
+      "java": "public class Main {\n\n    public static String[] fizzBuzz(int n) {\n        // Write your solution here\n        return new String[]{};\n    }\n\n    public static void main(String[] args) {\n        // Your code will be tested by the backend\n    }\n\n}\n"
+    },
+    "functionSignature": {
+      "python": "fizz_buzz(n)",
+      "java": "fizzBuzz(int n)"
+    },
+    "questionType": "function",
+    "execution": {
+      "methodName": "fizzBuzz",
+      "parameterTypes": [
+        "int"
+      ],
+      "inputFields": [
+        "n"
+      ],
+      "returnType": "String[]"
+    },
+    "testCases": [
+      {
+        "id": 1,
+        "input": {
+          "n": 3
+        },
+        "expectedOutput": [
+          "1",
+          "2",
+          "Fizz"
+        ]
+      },
+      {
+        "id": 2,
+        "input": {
+          "n": 5
+        },
+        "expectedOutput": [
+          "1",
+          "2",
+          "Fizz",
+          "4",
+          "Buzz"
+        ]
+      },
+      {
+        "id": 3,
+        "input": {
+          "n": 10
+        },
+        "expectedOutput": [
+          "1",
+          "2",
+          "Fizz",
+          "4",
+          "Buzz",
+          "Fizz",
+          "7",
+          "8",
+          "Fizz",
+          "Buzz"
+        ]
+      },
+      {
+        "id": 4,
+        "input": {
+          "n": 15
+        },
+        "expectedOutput": [
+          "1",
+          "2",
+          "Fizz",
+          "4",
+          "Buzz",
+          "Fizz",
+          "7",
+          "8",
+          "Fizz",
+          "Buzz",
+          "11",
+          "Fizz",
+          "13",
+          "14",
+          "FizzBuzz"
+        ]
+      }
+    ]
+  },
+  {
+    "questionId": "find-maximum",
+    "title": "Find Maximum Element",
+    "description": "Given an integer array nums, return the largest element in the array.",
+    "difficulty": "Easy",
+    "languages": [
+      "python",
+      "java"
+    ],
+    "starterCode": {
+      "python": "def find_maximum(nums):\n    # Write your solution here\n    return 0\n",
+      "java": "public class Main {\n\n    public static int findMaximum(int[] nums) {\n        // Write your solution here\n        return 0;\n    }\n\n    public static void main(String[] args) {\n        // Your code will be tested by the backend\n    }\n\n}\n"
+    },
+    "functionSignature": {
+      "python": "find_maximum(nums)",
+      "java": "findMaximum(int[] nums)"
+    },
+    "questionType": "function",
+    "execution": {
+      "methodName": "findMaximum",
+      "parameterTypes": [
+        "int[]"
+      ],
+      "inputFields": [
+        "nums"
+      ],
+      "returnType": "int"
+    },
+    "testCases": [
+      {
+        "id": 1,
+        "input": {
+          "nums": [1, 5, 3, 9, 2]
+        },
+        "expectedOutput": 9
+      },
+      {
+        "id": 2,
+        "input": {
+          "nums": [-10, -3, -20, -1]
+        },
+        "expectedOutput": -1
+      },
+      {
+        "id": 3,
+        "input": {
+          "nums": [100, 20, 50, 80]
+        },
+        "expectedOutput": 100
+      },
+      {
+        "id": 4,
+        "input": {
+          "nums": [7]
+        },
+        "expectedOutput": 7
+      }
+    ]
+  },
+  {
+    "questionId": "count-vowels",
+    "title": "Count Vowels",
+    "description": "Given a string s, return the number of vowels present in the string. Count a, e, i, o, and u in both uppercase and lowercase.",
+    "difficulty": "Easy",
+    "languages": [
+      "python",
+      "java"
+    ],
+    "starterCode": {
+      "python": "def count_vowels(s):\n    # Write your solution here\n    return 0\n",
+      "java": "public class Main {\n\n    public static int countVowels(String s) {\n        // Write your solution here\n        return 0;\n    }\n\n    public static void main(String[] args) {\n        // Your code will be tested by the backend\n    }\n\n}\n"
+    },
+    "functionSignature": {
+      "python": "count_vowels(s)",
+      "java": "countVowels(String s)"
+    },
+    "questionType": "function",
+    "execution": {
+      "methodName": "countVowels",
+      "parameterTypes": [
+        "String"
+      ],
+      "inputFields": [
+        "s"
+      ],
+      "returnType": "int"
+    },
+    "testCases": [
+      {
+        "id": 1,
+        "input": {
+          "s": "hello"
+        },
+        "expectedOutput": 2
+      },
+      {
+        "id": 2,
+        "input": {
+          "s": "education"
+        },
+        "expectedOutput": 5
+      },
+      {
+        "id": 3,
+        "input": {
+          "s": "HELLO"
+        },
+        "expectedOutput": 2
+      },
+      {
+        "id": 4,
+        "input": {
+          "s": "xyz"
+        },
+        "expectedOutput": 0
+      }
+    ]
+  }
+]

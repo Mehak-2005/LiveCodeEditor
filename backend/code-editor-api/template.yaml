@@ -1,0 +1,795 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Transform: AWS::Serverless-2016-10-31
+
+Description: >
+  Live Code Editor Backend
+
+  Backend APIs for the Live Code Editor assignment.
+  Provides question retrieval, question listing, code execution,
+  code saving, user-specific saved code retrieval, and user authentication.
+
+
+# =========================================================
+# GLOBAL SETTINGS
+# =========================================================
+
+Globals:
+
+  Function:
+    Timeout: 30
+    MemorySize: 512
+    Runtime: python3.14
+
+    Architectures:
+      - x86_64
+
+    LoggingConfig:
+      LogFormat: JSON
+
+
+  # =======================================================
+  # API GATEWAY GLOBAL SETTINGS
+  # =======================================================
+
+  Api:
+
+    Cors:
+      AllowMethods: "'GET,POST,OPTIONS'"
+      AllowHeaders: "'Content-Type,Authorization'"
+      AllowOrigin: "'*'"
+
+
+    # =====================================================
+    # COGNITO AUTHORIZER
+    #
+    # API Gateway will use Cognito to verify JWT tokens.
+    # =====================================================
+
+    Auth:
+
+      Authorizers:
+
+        CognitoAuthorizer:
+
+          UserPoolArn:
+            Fn::GetAtt:
+              - UserPool
+              - Arn
+
+
+# =========================================================
+# RESOURCES
+# =========================================================
+
+Resources:
+
+
+  # =========================================================
+  # 1. GET /question
+  #
+  # Reads one coding question and starter code from DynamoDB.
+  #
+  # This endpoint remains public because the frontend needs
+  # to load the question before the user starts coding.
+  # =========================================================
+
+  GetQuestionFunction:
+
+    Type: AWS::Serverless::Function
+
+    Properties:
+
+      CodeUri: src/get_question/
+      Handler: app.lambda_handler
+
+      Environment:
+
+        Variables:
+
+          QUESTION_TABLE:
+            Ref: QuestionTable
+
+      Policies:
+
+        - Statement:
+
+            - Effect: Allow
+
+              Action:
+                - dynamodb:GetItem
+
+              Resource:
+                Fn::GetAtt:
+                  - QuestionTable
+                  - Arn
+
+      Events:
+
+        GetQuestion:
+
+          Type: Api
+
+          Properties:
+
+            Path: /question
+            Method: get
+
+
+  # =========================================================
+  # 1A. GET /questions
+  #
+  # Returns ALL coding questions for the Question Library.
+  #
+  # The frontend uses this endpoint instead of maintaining
+  # a hardcoded list of questions.
+  #
+  # This endpoint remains public because users need to see
+  # the Question Library before opening a question.
+  # =========================================================
+
+  ListQuestionsFunction:
+
+    Type: AWS::Serverless::Function
+
+    Properties:
+
+      CodeUri: src/list_questions/
+      Handler: app.lambda_handler
+
+      Environment:
+
+        Variables:
+
+          QUESTION_TABLE:
+            Ref: QuestionTable
+
+      Policies:
+
+        - Statement:
+
+            - Effect: Allow
+
+              Action:
+                - dynamodb:Scan
+
+              Resource:
+                Fn::GetAtt:
+                  - QuestionTable
+                  - Arn
+
+      Events:
+
+        ListQuestions:
+
+          Type: Api
+
+          Properties:
+
+            Path: /questions
+            Method: get
+
+
+  # =========================================================
+  # 2. POST /run
+  #
+  # Python -> executed by RunCodeFunction
+  #
+  # Java -> forwarded to JavaExecutorFunction
+  #
+  # RunCodeFunction reads the question and test cases
+  # from DynamoDB.
+  #
+  # Cognito authentication is REQUIRED.
+  # =========================================================
+
+  RunCodeFunction:
+
+    Type: AWS::Serverless::Function
+
+    Properties:
+
+      CodeUri: src/run_code/
+      Handler: app.lambda_handler
+
+      Environment:
+
+        Variables:
+
+          # -------------------------------------------------
+          # Name of the Java Lambda to invoke
+          # -------------------------------------------------
+
+          JAVA_EXECUTOR_FUNCTION_NAME:
+            Ref: JavaExecutorFunction
+
+
+          # -------------------------------------------------
+          # Questions DynamoDB table
+          # -------------------------------------------------
+
+          QUESTION_TABLE:
+            Ref: QuestionTable
+
+
+      Policies:
+
+        # ---------------------------------------------------
+        # Allow RunCodeFunction to invoke Java Lambda
+        # ---------------------------------------------------
+
+        - Statement:
+
+            - Effect: Allow
+
+              Action:
+                - lambda:InvokeFunction
+
+              Resource:
+                Fn::GetAtt:
+                  - JavaExecutorFunction
+                  - Arn
+
+
+        # ---------------------------------------------------
+        # Allow RunCodeFunction to read questions and
+        # test cases from Questions DynamoDB table
+        # ---------------------------------------------------
+
+        - Statement:
+
+            - Effect: Allow
+
+              Action:
+                - dynamodb:GetItem
+
+              Resource:
+                Fn::GetAtt:
+                  - QuestionTable
+                  - Arn
+
+
+      Events:
+
+        RunCode:
+
+          Type: Api
+
+          Properties:
+
+            Path: /run
+            Method: post
+
+            # ------------------------------------------------
+            # REQUIRE COGNITO AUTHENTICATION
+            # ------------------------------------------------
+
+            Auth:
+              Authorizer: CognitoAuthorizer
+
+
+  # =========================================================
+  # 3. JAVA EXECUTOR LAMBDA
+  #
+  # Responsible for:
+  #
+  # - Receiving Java source code
+  # - Compiling Main.java
+  # - Running the Java program
+  # - Executing protected test cases
+  # - Returning test results
+  #
+  # This Lambda is NOT directly exposed through API Gateway.
+  #
+  # RunCodeFunction invokes it internally.
+  # =========================================================
+
+  JavaExecutorFunction:
+
+    Type: AWS::Serverless::Function
+
+    Properties:
+
+      CodeUri: src/java_executor/
+
+      Handler: com.example.JavaExecutor::handleRequest
+
+      # Override the global Python runtime
+
+      Runtime: java21
+
+      # More memory for Java compilation/execution
+
+      MemorySize: 1024
+
+      # Maximum execution time
+
+      Timeout: 15
+
+      Architectures:
+        - x86_64
+
+
+  # =========================================================
+  # 4. POST /save
+  #
+  # Saves user's code to DynamoDB.
+  #
+  # This endpoint requires Cognito authentication.
+  # =========================================================
+
+  SaveCodeFunction:
+
+    Type: AWS::Serverless::Function
+
+    Properties:
+
+      CodeUri: src/save_code/
+      Handler: app.lambda_handler
+
+      Environment:
+
+        Variables:
+
+          SAVED_CODE_TABLE:
+            Ref: SavedCodeTable
+
+      Policies:
+
+        - DynamoDBCrudPolicy:
+
+            TableName:
+              Ref: SavedCodeTable
+
+      Events:
+
+        SaveCode:
+
+          Type: Api
+
+          Properties:
+
+            Path: /save
+            Method: post
+
+            # ------------------------------------------------
+            # REQUIRE COGNITO AUTHENTICATION
+            # ------------------------------------------------
+
+            Auth:
+              Authorizer: CognitoAuthorizer
+
+
+  # =========================================================
+  # 5. GET /saved-code
+  #
+  # Retrieves saved code belonging to the authenticated user.
+  #
+  # This endpoint requires Cognito authentication.
+  # =========================================================
+
+  GetSavedCodeFunction:
+
+    Type: AWS::Serverless::Function
+
+    Properties:
+
+      CodeUri: src/get_saved_code/
+      Handler: app.lambda_handler
+
+      Environment:
+
+        Variables:
+
+          SAVED_CODE_TABLE:
+            Ref: SavedCodeTable
+
+          SAVED_CODE_INDEX: UserSavedCodeIndex
+
+      Policies:
+
+        # ---------------------------------------------------
+        # Allow this Lambda to query the SavedCode table
+        # and its user-specific GSI.
+        # ---------------------------------------------------
+
+        - Statement:
+
+            - Effect: Allow
+
+              Action:
+                - dynamodb:Query
+
+              Resource:
+
+                # Main DynamoDB table
+
+                - Fn::GetAtt:
+                    - SavedCodeTable
+                    - Arn
+
+                # Global Secondary Index
+
+                - Fn::Sub:
+                    - "${TableArn}/index/UserSavedCodeIndex"
+
+                    - TableArn:
+                        Fn::GetAtt:
+                          - SavedCodeTable
+                          - Arn
+
+      Events:
+
+        GetSavedCode:
+
+          Type: Api
+
+          Properties:
+
+            Path: /saved-code
+            Method: get
+
+            # ------------------------------------------------
+            # REQUIRE COGNITO AUTHENTICATION
+            # ------------------------------------------------
+
+            Auth:
+              Authorizer: CognitoAuthorizer
+
+
+  # =========================================================
+  # 6. QUESTIONS DYNAMODB TABLE
+  #
+  # Stores:
+  #
+  # - questionId
+  # - title
+  # - description
+  # - difficulty
+  # - supported languages
+  # - starter code
+  # - function signatures
+  # - execution configuration
+  # - test cases
+  #
+  # Example:
+  #
+  # questionId = two-sum
+  # =========================================================
+
+  QuestionTable:
+
+    Type: AWS::DynamoDB::Table
+
+    Properties:
+
+      TableName: live-code-editor-questions
+
+      BillingMode: PAY_PER_REQUEST
+
+      AttributeDefinitions:
+
+        - AttributeName: questionId
+          AttributeType: S
+
+      KeySchema:
+
+        - AttributeName: questionId
+          KeyType: HASH
+
+
+  # =========================================================
+  # 7. SAVED CODE DYNAMODB TABLE
+  #
+  # Stores each user's saved code.
+  #
+  # Primary key:
+  #   saveId
+  #
+  # Global Secondary Index:
+  #   userId + savedAt
+  #
+  # This allows us to retrieve saved code for one user
+  # without scanning the entire table.
+  # =========================================================
+
+  SavedCodeTable:
+
+    Type: AWS::DynamoDB::Table
+
+    Properties:
+
+      TableName: live-code-editor-saved-code
+
+      BillingMode: PAY_PER_REQUEST
+
+      AttributeDefinitions:
+
+        # Primary key
+
+        - AttributeName: saveId
+          AttributeType: S
+
+        # GSI partition key
+
+        - AttributeName: userId
+          AttributeType: S
+
+        # GSI sort key
+
+        - AttributeName: savedAt
+          AttributeType: S
+
+      KeySchema:
+
+        - AttributeName: saveId
+          KeyType: HASH
+
+      GlobalSecondaryIndexes:
+
+        - IndexName: UserSavedCodeIndex
+
+          KeySchema:
+
+            - AttributeName: userId
+              KeyType: HASH
+
+            - AttributeName: savedAt
+              KeyType: RANGE
+
+          Projection:
+            ProjectionType: ALL
+
+
+  # =========================================================
+  # 8. COGNITO USER POOL
+  #
+  # Handles:
+  #
+  # - User registration
+  # - User login
+  # - Email verification
+  # - Password management
+  # =========================================================
+
+  UserPool:
+
+    Type: AWS::Cognito::UserPool
+
+    Properties:
+
+      UserPoolName: live-code-editor-users
+
+      # Users log in using their email address
+
+      UsernameAttributes:
+        - email
+
+      # Cognito verifies the user's email
+
+      AutoVerifiedAttributes:
+        - email
+
+      Policies:
+
+        PasswordPolicy:
+
+          MinimumLength: 8
+
+          RequireUppercase: true
+
+          RequireLowercase: true
+
+          RequireNumbers: true
+
+          RequireSymbols: false
+
+
+  # =========================================================
+  # 9. COGNITO APP CLIENT
+  #
+  # This client is used by the React frontend.
+  #
+  # GenerateSecret is false because this is a browser-based
+  # application and the client secret cannot be kept private
+  # in a browser.
+  # =========================================================
+
+  UserPoolClient:
+
+    Type: AWS::Cognito::UserPoolClient
+
+    Properties:
+
+      UserPoolId:
+        Ref: UserPool
+
+      ClientName: live-code-editor-web-client
+
+      # No client secret for browser application
+
+      GenerateSecret: false
+
+      ExplicitAuthFlows:
+
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+
+
+# =========================================================
+# OUTPUTS
+# =========================================================
+
+Outputs:
+
+
+  # =========================================================
+  # API Gateway Base URL
+  # =========================================================
+
+  ApiBaseUrl:
+
+    Description: >
+      Base URL for the Live Code Editor API
+
+    Value:
+
+      Fn::Sub:
+        - https://${ApiId}.execute-api.${AWS::Region}.amazonaws.com/Prod
+
+        - ApiId:
+            Ref: ServerlessRestApi
+
+
+  # =========================================================
+  # GET /question
+  # =========================================================
+
+  QuestionApi:
+
+    Description: GET /question endpoint
+
+    Value:
+
+      Fn::Sub:
+        - https://${ApiId}.execute-api.${AWS::Region}.amazonaws.com/Prod/question
+
+        - ApiId:
+            Ref: ServerlessRestApi
+
+
+  # =========================================================
+  # GET /questions
+  #
+  # Returns all questions for the Question Library.
+  # =========================================================
+
+  QuestionsApi:
+
+    Description: GET /questions endpoint
+
+    Value:
+
+      Fn::Sub:
+        - https://${ApiId}.execute-api.${AWS::Region}.amazonaws.com/Prod/questions
+
+        - ApiId:
+            Ref: ServerlessRestApi
+
+
+  # =========================================================
+  # POST /run
+  # =========================================================
+
+  RunApi:
+
+    Description: POST /run endpoint
+
+    Value:
+
+      Fn::Sub:
+        - https://${ApiId}.execute-api.${AWS::Region}.amazonaws.com/Prod/run
+
+        - ApiId:
+            Ref: ServerlessRestApi
+
+
+  # =========================================================
+  # POST /save
+  # =========================================================
+
+  SaveApi:
+
+    Description: POST /save endpoint
+
+    Value:
+
+      Fn::Sub:
+        - https://${ApiId}.execute-api.${AWS::Region}.amazonaws.com/Prod/save
+
+        - ApiId:
+            Ref: ServerlessRestApi
+
+
+  # =========================================================
+  # GET /saved-code
+  # =========================================================
+
+  SavedCodeHistoryApi:
+
+    Description: GET /saved-code endpoint
+
+    Value:
+
+      Fn::Sub:
+        - https://${ApiId}.execute-api.${AWS::Region}.amazonaws.com/Prod/saved-code
+
+        - ApiId:
+            Ref: ServerlessRestApi
+
+
+  # =========================================================
+  # Questions DynamoDB table
+  # =========================================================
+
+  QuestionTableName:
+
+    Description: >
+      DynamoDB table containing coding questions,
+      starter code and test cases
+
+    Value:
+      Ref: QuestionTable
+
+
+  # =========================================================
+  # Saved Code DynamoDB table
+  # =========================================================
+
+  SavedCodeTableName:
+
+    Description: >
+      DynamoDB table used to store saved code
+
+    Value:
+      Ref: SavedCodeTable
+
+
+  # =========================================================
+  # Java Executor Lambda ARN
+  # =========================================================
+
+  JavaExecutorFunctionArn:
+
+    Description: >
+      ARN of the Java code execution Lambda
+
+    Value:
+
+      Fn::GetAtt:
+        - JavaExecutorFunction
+        - Arn
+
+
+  # =========================================================
+  # Cognito User Pool ID
+  # =========================================================
+
+  UserPoolId:
+
+    Description: Cognito User Pool ID
+
+    Value:
+      Ref: UserPool
+
+
+  # =========================================================
+  # Cognito App Client ID
+  # =========================================================
+
+  UserPoolClientId:
+
+    Description: Cognito App Client ID
+
+    Value:
+      Ref: UserPoolClient

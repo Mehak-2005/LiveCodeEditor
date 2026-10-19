@@ -1,0 +1,10 @@
+
+from django.http import JsonResponse
+
+
+def home(request):
+    return JsonResponse({
+        "success": True,
+        "message": "Your Django application is running!",
+        "framework": "Django"
+    })
