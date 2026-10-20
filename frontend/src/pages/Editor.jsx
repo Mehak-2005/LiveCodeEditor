@@ -641,141 +641,86 @@ export default function Editor() {
   // ============================================================
 
   return (
-
-    <div className="h-screen w-screen flex flex-col bg-[#141414] overflow-hidden select-none">
-
-
+    <div className="h-screen w-screen flex flex-col bg-[#080c14] overflow-hidden select-none">
       {/* ======================================================
           TOP HEADER
       ====================================================== */}
-
       <Header
-
         questionTitle={
           question?.title ||
           currentQuestionId
         }
-
         language={selectedLanguage}
-
         supportedLanguages={
           question?.supportedLanguages ||
           ['python', 'java']
         }
-
         onLanguageChange={
           handleLanguageChange
         }
-
         onRun={handleRun}
-
         isRunning={isRunning}
-
         onSave={handleSave}
-
         isSaving={isSaving}
-
         isSaved={isSaved}
-
         onOpenHistory={() =>
           setIsHistoryOpen(true)
         }
-
         user={user}
-
         onSignOut={async () => {
-
           await signOut();
-
           navigate('/login');
-
         }}
-
       />
-
 
       {/* ======================================================
           MOBILE / TABLET TABS
       ====================================================== */}
-
-      <div className="flex md:hidden bg-[#1e1e1e] border-b border-[#333333] px-2 py-1 gap-1 shrink-0">
-
-
+      <div className="flex md:hidden bg-[#080c14] border-b border-slate-800/80 px-2 py-1.5 gap-1.5 shrink-0">
         <button
-
           onClick={() =>
             setActiveMobileTab('question')
           }
-
-          className={`flex-1 py-1.5 px-2 rounded text-xs font-medium flex items-center justify-center gap-1.5 transition-colors ${
+          className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-all ${
             activeMobileTab === 'question'
-              ? 'bg-[#007acc] text-white'
-              : 'text-zinc-400 hover:text-zinc-200 hover:bg-[#252526]'
+              ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-sm'
+              : 'text-slate-400 hover:text-slate-200 hover:bg-[#0e1422]'
           }`}
-
         >
-
           <BookOpen className="w-3.5 h-3.5" />
-
-          <span>
-            Problem
-          </span>
-
+          <span>Problem</span>
         </button>
 
-
         <button
-
           onClick={() =>
             setActiveMobileTab('editor')
           }
-
-          className={`flex-1 py-1.5 px-2 rounded text-xs font-medium flex items-center justify-center gap-1.5 transition-colors ${
+          className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-all ${
             activeMobileTab === 'editor'
-              ? 'bg-[#007acc] text-white'
-              : 'text-zinc-400 hover:text-zinc-200 hover:bg-[#252526]'
+              ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-sm'
+              : 'text-slate-400 hover:text-slate-200 hover:bg-[#0e1422]'
           }`}
-
         >
-
           <Code className="w-3.5 h-3.5" />
-
-          <span>
-            Editor
-          </span>
-
+          <span>Editor</span>
         </button>
 
-
         <button
-
           onClick={() =>
             setActiveMobileTab('output')
           }
-
-          className={`flex-1 py-1.5 px-2 rounded text-xs font-medium flex items-center justify-center gap-1.5 transition-colors ${
+          className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-all ${
             activeMobileTab === 'output'
-              ? 'bg-[#007acc] text-white'
-              : 'text-zinc-400 hover:text-zinc-200 hover:bg-[#252526]'
+              ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-sm'
+              : 'text-slate-400 hover:text-slate-200 hover:bg-[#0e1422]'
           }`}
-
         >
-
           <TerminalSquare className="w-3.5 h-3.5" />
-
-          <span>
-            Output & Tests
-          </span>
-
-
+          <span>Output & Tests</span>
           {resultsData && (
-
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-
+            <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
           )}
-
         </button>
-
       </div>
 
 
@@ -916,64 +861,47 @@ export default function Editor() {
       {/* ======================================================
           BOTTOM STATUS BAR
       ====================================================== */}
+      <footer className="h-7 bg-[#070b13] border-t border-slate-800/80 text-slate-400 px-3 sm:px-4 flex items-center justify-between text-xs font-mono shrink-0 select-none z-10 shadow-inner">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <span className="flex items-center gap-2 font-sans font-medium text-slate-200">
+            <span
+              className={`w-2 h-2 rounded-full ${
+                isRunning
+                  ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)] animate-ping'
+                  : executionError
+                  ? 'bg-rose-400 shadow-[0_0_8px_rgba(251,113,133,0.8)]'
+                  : 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse'
+              }`}
+            />
+            <span className="text-xs">{statusMessage}</span>
+          </span>
 
-      <footer className="h-6 bg-[#007acc] text-white px-3 flex items-center justify-between text-[11px] font-mono shrink-0 select-none z-10">
+          <span className="hidden sm:inline text-slate-700">|</span>
 
-
-        <div className="flex items-center gap-3">
-
-          <span className="flex items-center gap-1.5 font-sans font-medium">
-
-            <span className="w-2 h-2 rounded-full bg-white/80 animate-pulse" />
-
-            <span>
-              {statusMessage}
+          <span className="hidden sm:inline-flex items-center gap-1.5 text-slate-400 text-[11px]">
+            <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
+            <span className="capitalize">
+              {selectedLanguage === 'python'
+                ? 'Python 3.12 • AWS Lambda Engine'
+                : 'Java 21 • AWS Lambda Engine'}
             </span>
-
           </span>
-
-
-          <span className="hidden sm:inline opacity-70">
-            |
-          </span>
-
-
-          <span className="hidden sm:inline opacity-90 capitalize">
-
-            {
-              selectedLanguage === 'python'
-                ? 'Python 3.12 (AWS Lambda)'
-                : 'Java 21 (AWS Lambda)'
-            }
-
-          </span>
-
         </div>
 
+        <div className="flex items-center gap-2.5 sm:gap-3 text-[11px]">
+          {user && (
+            <span className="hidden md:inline text-slate-400">
+              Cognito: <strong className="text-slate-300 font-normal">{user.email}</strong>
+            </span>
+          )}
 
-        <div className="flex items-center gap-3">
+          <span className="hidden sm:inline text-slate-700">|</span>
 
-          <span className="hidden md:inline opacity-80">
-
-            Cognito User: {
-              user?.email ||
-              'Authenticated'
-            }
-
+          <span className="inline-flex items-center gap-1.5 text-slate-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            <span>Cloud-Native IDE</span>
           </span>
-
-
-          <span className="hidden sm:inline opacity-70">
-            |
-          </span>
-
-
-          <span className="opacity-90">
-            Cloud-Native IDE
-          </span>
-
         </div>
-
       </footer>
 
 

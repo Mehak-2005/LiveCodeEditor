@@ -21,74 +21,74 @@ export default function TestResults({ resultsData }) {
     <div className="space-y-4">
       {/* Top Summary Banner */}
       <div
-        className={`p-4 rounded-lg border ${
+        className={`p-4 sm:p-5 rounded-2xl border shadow-lg ${
           allPassed
-            ? 'bg-emerald-950/30 border-emerald-500/40 text-emerald-200'
+            ? 'bg-gradient-to-b from-[#0a1816]/90 to-[#071210]/90 border-emerald-500/30 text-emerald-200'
             : failedTestCases > 0
-            ? 'bg-rose-950/30 border-rose-500/40 text-rose-200'
-            : 'bg-[#252526] border-[#3e3e42] text-zinc-300'
+            ? 'bg-gradient-to-b from-[#1c0d12]/90 to-[#14080d]/90 border-rose-500/30 text-rose-200'
+            : 'bg-[#0e1422] border-slate-800 text-slate-300'
         }`}
       >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
-          <div className="flex items-center gap-2.5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div className="flex items-center gap-3">
             {allPassed ? (
-              <div className="p-1.5 rounded-full bg-emerald-500/20 text-emerald-400">
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center ring-1 ring-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.25)]">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
             ) : (
-              <div className="p-1.5 rounded-full bg-rose-500/20 text-rose-400">
+              <div className="w-9 h-9 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center ring-1 ring-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.25)]">
                 <XCircle className="w-5 h-5" />
               </div>
             )}
             <div>
-              <div className="text-sm font-bold tracking-wide uppercase font-mono">
-                {allPassed ? 'Execution Completed' : 'Tests Incomplete'}
+              <div className="text-sm font-bold tracking-tight text-white">
+                {allPassed ? 'All Test Cases Passed' : 'Tests Incomplete'}
               </div>
-              <div className="text-xs text-zinc-400">
+              <div className="text-xs text-slate-400 mt-0.5">
                 {allPassed
-                  ? `All ${totalTestCases} test cases passed successfully!`
-                  : `${passedTestCases} passed, ${failedTestCases} failed out of ${totalTestCases} total test cases`}
+                  ? `Execution succeeded! All ${totalTestCases} test cases passed cleanly.`
+                  : `${passedTestCases} passed, ${failedTestCases} failed out of ${totalTestCases} test cases.`}
               </div>
             </div>
           </div>
 
           {/* Quick Metrics Badges */}
-          <div className="flex items-center gap-2 text-xs font-mono">
-            <span className="px-2.5 py-1 rounded bg-[#1e1e1e] border border-[#3e3e42] text-zinc-300">
+          <div className="flex items-center gap-2 text-xs font-mono self-start sm:self-auto">
+            <span className="px-2.5 py-1 rounded-lg bg-[#070b13] border border-slate-800 text-slate-300">
               Total: <strong className="text-white">{totalTestCases}</strong>
             </span>
-            <span className="px-2.5 py-1 rounded bg-emerald-950/70 border border-emerald-500/40 text-emerald-300">
+            <span className="px-2.5 py-1 rounded-lg bg-emerald-950/60 border border-emerald-500/30 text-emerald-300">
               Passed: <strong className="text-emerald-400">{passedTestCases}</strong>
             </span>
-            <span className="px-2.5 py-1 rounded bg-rose-950/70 border border-rose-500/40 text-rose-300">
+            <span className="px-2.5 py-1 rounded-lg bg-rose-950/60 border border-rose-500/30 text-rose-300">
               Failed: <strong className="text-rose-400">{failedTestCases}</strong>
             </span>
           </div>
         </div>
 
         {/* Progress Bar */}
-        <div className="w-full bg-[#181818] h-2 rounded-full overflow-hidden border border-[#333333]">
+        <div className="w-full bg-[#070b13] h-2 rounded-full overflow-hidden border border-slate-800/80">
           <div
-            className={`h-full transition-all duration-500 rounded-full ${
+            className={`h-full transition-all duration-700 rounded-full ${
               allPassed
-                ? 'bg-emerald-500'
+                ? 'bg-gradient-to-r from-emerald-500 to-teal-400 shadow-[0_0_10px_rgba(16,185,129,0.5)]'
                 : passPercentage > 0
-                ? 'bg-amber-500'
+                ? 'bg-gradient-to-r from-amber-500 to-amber-400'
                 : 'bg-rose-500'
             }`}
-            style={{ width: `${Math.max(passPercentage, 2)}%` }}
-          ></div>
+            style={{ width: `${Math.max(passPercentage, 3)}%` }}
+          />
         </div>
       </div>
 
       {/* Global compilation/runtime error if any */}
       {error && (
-        <div className="p-4 bg-rose-950/40 border border-rose-500/40 rounded-lg text-rose-200">
-          <div className="flex items-center gap-2 font-semibold text-sm mb-1 text-rose-300">
+        <div className="p-4 bg-rose-950/30 border border-rose-500/30 rounded-2xl text-rose-200 shadow-lg">
+          <div className="flex items-center gap-2 font-semibold text-sm mb-2 text-rose-300">
             <AlertCircle className="w-4 h-4 text-rose-400" />
             <span>Execution / Compilation Output</span>
           </div>
-          <pre className="text-xs font-mono bg-[#181818] p-3 rounded border border-[#333333] whitespace-pre-wrap select-text text-rose-200">
+          <pre className="text-xs font-mono bg-[#070b13] p-3 rounded-xl border border-rose-500/20 whitespace-pre-wrap select-text text-rose-200">
             {error}
           </pre>
         </div>

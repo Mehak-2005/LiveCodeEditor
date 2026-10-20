@@ -9,11 +9,10 @@ export default function LanguageSelector({
 }) {
   return (
     <div className="relative inline-flex items-center">
-      <div className="relative flex items-center bg-[#252526] hover:bg-[#2d2d30] border border-[#3e3e42] rounded-md transition-colors">
-
+      <div className="relative flex items-center bg-[#0e1422] hover:bg-[#151d30] border border-slate-800 hover:border-slate-700 rounded-lg transition-all shadow-sm">
         {/* Code Icon */}
-        <div className="pl-2.5 pr-1.5 text-zinc-400">
-          <Code2 className="w-4 h-4 text-[#007acc]" />
+        <div className="pl-2.5 pr-1.5 text-slate-400">
+          <Code2 className="w-3.5 h-3.5 text-sky-400" />
         </div>
 
         {/* Language Selector */}
@@ -21,14 +20,14 @@ export default function LanguageSelector({
           value={language}
           onChange={(e) => onLanguageChange(e.target.value)}
           disabled={disabled}
-          className="appearance-none bg-transparent text-sm font-medium text-zinc-200 py-1.5 pl-1 pr-7 cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#007acc] disabled:opacity-50 disabled:cursor-not-allowed capitalize"
+          className="appearance-none bg-transparent text-xs sm:text-sm font-medium text-slate-200 py-1.5 pl-0.5 pr-7 cursor-pointer focus:outline-none focus:ring-1 focus:ring-sky-500/50 disabled:opacity-50 disabled:cursor-not-allowed capitalize font-sans"
           title="Select programming language"
         >
           {supportedLanguages.map((lang) => (
             <option
               key={lang}
               value={lang}
-              className="bg-[#252526] text-zinc-200 py-1"
+              className="bg-[#0e1422] text-slate-200 py-1.5"
             >
               {lang === 'python'
                 ? 'Python 3'
@@ -40,8 +39,7 @@ export default function LanguageSelector({
         </select>
 
         {/* Dropdown Icon */}
-        <ChevronDown className="w-3.5 h-3.5 text-zinc-400 absolute right-2 pointer-events-none" />
-
+        <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2 pointer-events-none" />
       </div>
     </div>
   );

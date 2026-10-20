@@ -8,29 +8,29 @@ export default function SaveButton({ onSave, isSaving = false, isSaved = false, 
       onClick={onSave}
       disabled={isSaving || disabled}
       title="Save code to cloud (Ctrl + S)"
-      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-medium text-sm transition-all duration-150 border
+      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium text-xs sm:text-sm transition-all duration-150 border shadow-sm
         ${
           isSaved
-            ? 'bg-[#252526] border-emerald-500/60 text-emerald-400'
-            : 'bg-[#252526] hover:bg-[#2d2d30] border-[#3e3e42] text-zinc-200 hover:text-white'
+            ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.15)]'
+            : 'bg-[#0e1422] hover:bg-[#151d30] border-slate-800 hover:border-slate-700 text-slate-200 hover:text-white'
         }
-        disabled:opacity-60 disabled:cursor-not-allowed`}
+        disabled:opacity-50 disabled:cursor-not-allowed`}
     >
       {isSaving ? (
         <>
-          <LoadingSpinner size="sm" className="text-zinc-300" />
+          <LoadingSpinner size="sm" className="text-slate-300" />
           <span>Saving...</span>
         </>
       ) : isSaved ? (
         <>
-          <Check className="w-4 h-4 text-emerald-400" />
+          <Check className="w-3.5 h-3.5 text-emerald-400" />
           <span>Saved</span>
         </>
       ) : (
         <>
-          <Save className="w-4 h-4 text-zinc-400" />
+          <Save className="w-3.5 h-3.5 text-slate-400" />
           <span>Save</span>
-          <span className="hidden lg:inline text-xs text-zinc-500 font-mono ml-0.5">
+          <span className="hidden lg:inline text-[10px] bg-[#070b13] border border-slate-800 text-slate-400 font-mono px-1.5 py-0.5 rounded font-normal">
             Ctrl+S
           </span>
         </>
