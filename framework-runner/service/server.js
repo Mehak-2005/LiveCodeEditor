@@ -104,16 +104,20 @@ async function resolveCreationPath(appPath, requestedPath) {
 }
 
 async function getContainerUrl(containerName, containerPort) {
-  const { stdout } = await execFileAsync("docker", ["port", containerName, `${containerPort}/tcp`], { timeout: 10000, maxBuffer: 1024 * 1024 });
+  const { stdout } = await execFileAsync(
+    "docker", ["port", containerName, `${containerPort}/tcp`],
+     { timeout: 10000, maxBuffer: 1024 * 1024 });
   const match = stdout.trim().match(/127\.0\.0\.1:(\d+)/) || stdout.trim().match(/0\.0\.0\.0:(\d+)/);
   if (!match) throw new Error(`Unable to determine host port for ${containerName}. Docker returned: ${stdout.trim()}`);
-  const publishedPort = Number(match[1]);
-  if (!Number.isInteger(publishedPort) || publishedPort < 1 || publishedPort > 65535) {
-    throw new Error(`Docker returned an invalid published port for ${containerName}.`);
+  const publishedPort = Number(match[1])
+if (!Number.isInteger(publishedPort) || publishedPort < 1 || publishedPort > 65535) {
+ throw new Error(`Docker returned an invalid published port for ${containerName}.`);
   }
+ 
   // For deployment, configure a reverse proxy and a URL template such as
   // https://preview.example.com/{port}. The proxy must route that port to the
   // Docker-published port. Without a template, this remains local-development only.
+
   if (PREVIEW_URL_TEMPLATE) {
     return PREVIEW_URL_TEMPLATE.replaceAll("{port}", String(publishedPort));
   }
@@ -143,9 +147,8 @@ async function ensureDevImage() {
 }
 
 async function ensureSpringBootDevContainer(projectId, appPath) {
-  const containerName = `lce-dev-${projectId}`;
+const containerName = `lce-dev-${projectId}`;
   await ensureDevImage();
-
   if (await containerExists(containerName)) {
     try {
       await execFileAsync("docker", ["exec", containerName, "python", "--version"], { timeout: 10000 });
@@ -177,7 +180,7 @@ app.get("/api/projects", async (_req, res) => {
       try {
         const metadata = JSON.parse(await readFile(path.join(PROJECTS_DIR, entry.name, "project.json"), "utf8"));
         if (metadata.projectId === entry.name && ALLOWED_FRAMEWORKS.has(metadata.framework)) projects.push(metadata);
-      } catch { /* Ignore folders that are not managed projects. */ }
+      } catch { / Ignore folders that are not managed projects. / }
     }
     projects.sort((a, b) => String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? "")));
     res.json({ success: true, projects });
@@ -314,10 +317,8 @@ app.post("/api/projects/:projectId/folders", async (req, res) => {
   }
 });
 
-
 app.post("/api/projects/:projectId/run", async (req, res) => {
   const { projectId } = req.params;
-
   if (!isValidProjectId(projectId)) {
     return res.status(400).json({
       success: false,
@@ -325,47 +326,36 @@ app.post("/api/projects/:projectId/run", async (req, res) => {
     });
   }
 
-  const containerName = `lce-${projectId}`;
-  let containerStarted = false;
+const containerName = `lce-${projectId}`;
+let containerStarted = false;
 
   try {
     const metadata = await readProjectMetadata(projectId);
     const config = getFrameworkConfig(metadata.framework);
-
     if (!config) {
       return res.status(400).json({
         success: false,
         error: "Unsupported framework.",
       });
     }
-
     const { appPath } = getProjectPaths(projectId);
-
-    // Reuse an already-running container.
+    // Reuse a running container if one already exists.
     if (await containerExists(containerName)) {
       const { stdout: runningOutput } = await execFileAsync(
         "docker",
-        [
-          "inspect",
-          "--format",
-          "{{.State.Running}}",
-          containerName,
-        ],
+        ["inspect", "--format", "{{.State.Running}}", containerName],
         { timeout: 10000 }
       );
-
       if (runningOutput.trim() === "true") {
         const { stdout: idOutput } = await execFileAsync(
           "docker",
           ["inspect", "--format", "{{.Id}}", containerName],
           { timeout: 10000 }
         );
-
         const url = await getContainerUrl(
           containerName,
           config.containerPort
         );
-
         return res.json({
           success: true,
           projectId,
@@ -376,30 +366,30 @@ app.post("/api/projects/:projectId/run", async (req, res) => {
           message: "Project is already running.",
         });
       }
-
       await stopAndRemoveContainer(containerName);
     }
-
-    // Confirm that the project has a Dockerfile.
+    // Confirm that the project contains a Dockerfile.
     await readFile(path.join(appPath, "Dockerfile"), "utf8");
-
     // Build the project image.
     const imageName = `${config.imagePrefix}-${projectId}:local`;
-
     await execFileAsync(
       "docker",
       ["build", "-t", imageName, appPath],
       {
         timeout: 300000,
         maxBuffer: 2 * 1024 * 1024,
+        env: {
+          ...process.env,
+          DOCKER_BUILDKIT: "0",
+        },
+        windowsHide: true,
       }
     );
-
-    // Prepare Docker run arguments.
+    // Start the container and publish its application port.
+    // Do not inspect the container until docker run has completed.
     const dockerArgs = [
       "run",
       "-d",
-      "--rm",
       "--name",
       containerName,
       "--memory=768m",
@@ -411,40 +401,59 @@ app.post("/api/projects/:projectId/run", async (req, res) => {
       "/tmp:rw,noexec,nosuid,size=128m",
       "-p",
       `${DOCKER_PORT_BIND_HOST}::${config.containerPort}`,
+      imageName,
     ];
-
-    // Django runs using the mounted project workspace.
-    // Spring Boot uses the JAR built into its Docker image.
-    if (metadata.framework === "django") {
-      dockerArgs.push(
-        "-v",
-        `${path.resolve(appPath)}:/workspace`,
-        "-w",
-        "/workspace"
-      );
-    }
-
-    dockerArgs.push(imageName);
-
-    const { stdout } = await execFileAsync(
+    
+    const { stdout: runOutput } = await execFileAsync(
       "docker",
       dockerArgs,
       {
-        timeout: 30000,
+        timeout: 60000,
         maxBuffer: 1024 * 1024,
+        windowsHide: true,
       }
     );
-
+    const containerId = runOutput.trim();
+    if (!containerId) {
+      throw new Error("Docker did not return a container ID.");
+    }
     containerStarted = true;
+    // Verify that the newly created container exists.
+    const { stdout: inspectOutput } = await execFileAsync(
+      "docker",
+      [
+        "inspect",
+        "--format",
+        '{{json .State}} {{json .NetworkSettings.Ports}}',
+        containerName,
+      ],
+      { timeout: 10000, windowsHide: true }
+    );
+    console.log("Container state and ports:", inspectOutput);
+    const { stdout: runningState } = await execFileAsync(
+      "docker",
+      ["inspect", "--format", "{{.State.Running}}", containerName],
+      { timeout: 10000, windowsHide: true }
+    );
 
-    const containerId = stdout.trim();
-
-    // Confirm Docker has published the requested port.
+    if (runningState.trim() !== "true") {
+      const { stdout: logsOut, stderr: logsErr } = await execFileAsync(
+        "docker",
+        ["logs", "--tail", "100", containerName],
+        { timeout: 10000, maxBuffer: 1024 * 1024, windowsHide: true }
+      ).catch((error) => ({
+        stdout: error.stdout || "",
+        stderr: error.stderr || "",
+      }));
+      throw new Error(
+        `Container exited during startup. ${logsOut}\n${logsErr}`
+      );
+    }
+    // Retrieve the published host port only after the container starts.
     const url = await getContainerUrl(
       containerName,
       config.containerPort
     );
-
     return res.json({
       success: true,
       projectId,
@@ -456,24 +465,16 @@ app.post("/api/projects/:projectId/run", async (req, res) => {
     });
   } catch (error) {
     console.error("Failed to run framework project:", error);
-
-    if (error.stdout) {
-      console.error("Docker stdout:", error.stdout);
-    }
-
-    if (error.stderr) {
-      console.error("Docker stderr:", error.stderr);
-    }
-
-    // Clean up the failed container if it exists.
+    if (error.stdout) console.error("Docker stdout:", error.stdout);
+    if (error.stderr) console.error("Docker stderr:", error.stderr);
+    // Remove a container only when it actually exists.
     try {
-      if (containerStarted || (await containerExists(containerName))) {
+      if (containerStarted || await containerExists(containerName)) {
         await stopAndRemoveContainer(containerName);
       }
     } catch (cleanupError) {
       console.error("Container cleanup failed:", cleanupError.message);
     }
-
     return res.status(500).json({
       success: false,
       error: "Unable to start the project. Check Docker, project files, build output, and container logs.",
@@ -481,7 +482,6 @@ app.post("/api/projects/:projectId/run", async (req, res) => {
     });
   }
 });
-
 
 app.post("/api/projects/:projectId/terminal", async (req, res) => {
   const { projectId } = req.params;
@@ -509,19 +509,58 @@ app.post("/api/projects/:projectId/terminal", async (req, res) => {
 
 app.get("/api/projects/:projectId/status", async (req, res) => {
   const { projectId } = req.params;
-  if (!isValidProjectId(projectId)) return res.status(400).json({ success: false, error: "Invalid project ID." });
+  if (!isValidProjectId(projectId)) {
+    return res.status(400).json({
+      success: false,
+      error: "Invalid project ID.",
+    });
+  }
   try {
     const metadata = await readProjectMetadata(projectId);
     const config = getFrameworkConfig(metadata.framework);
-    const containerName = `lce-${projectId}`;
-    if (!await containerExists(containerName)) return res.json({ success: true, projectId, framework: metadata.framework, status: "stopped", url: null, message: "The project exists, but its container is not running." });
-    const { stdout } = await execFileAsync("docker", ["inspect", "--format", "{{.State.Status}}", containerName], { timeout: 10000 });
+    if (!config) {
+      return res.status(400).json({
+        success: false,
+        error: "Unsupported framework.",
+      });
+    }
+
+const containerName = `lce-${projectId}`;
+    if (!(await containerExists(containerName))) {
+      return res.json({
+        success: true,
+        projectId,
+        framework: metadata.framework,
+        status: "stopped",
+        url: null,
+        message: "The application container is not running.",
+      });
+    }
+    const { stdout } = await execFileAsync(
+      "docker",
+      ["inspect", "--format", "{{.State.Status}}", containerName],
+      { timeout: 10000 }
+    );
     const status = stdout.trim();
-    res.json({ success: true, projectId, framework: metadata.framework, status, url: status === "running" ? await getContainerUrl(containerName, config.containerPort) : null });
+    let url = null;
+    if (status === "running") {
+      url = await getContainerUrl(containerName, config.containerPort);
+    }
+    return res.json({
+      success: true,
+      projectId,
+      framework: metadata.framework,
+      status,
+      url,
+    });
   } catch (error) {
-    if (error.code === "ENOENT") return res.status(404).json({ success: false, projectId, status: "not_found", error: "Project metadata was not found." });
     console.error("Failed to check project status:", error);
-    res.status(500).json({ success: false, projectId, error: "Unable to check project status." });
+    return res.status(500).json({
+      success: false,
+      projectId,
+      error: "Unable to check project status.",
+      details: error.message,
+    });
   }
 });
 
@@ -540,14 +579,34 @@ app.get("/api/projects/:projectId/logs", async (req, res) => {
 
 app.post("/api/projects/:projectId/stop", async (req, res) => {
   const { projectId } = req.params;
-  if (!isValidProjectId(projectId)) return res.status(400).json({ success: false, error: "Invalid project ID." });
+  if (!isValidProjectId(projectId)) {
+    return res.status(400).json({
+      success: false,
+      error: "Invalid project ID.",
+    });
+  }
   try {
     const metadata = await readProjectMetadata(projectId);
-    await stopAndRemoveContainer(`lce-${projectId}`);
-    res.json({ success: true, projectId, framework: metadata.framework, status: "stopped", message: `${metadata.framework} project container stopped successfully.` });
+    const containerNames =
+      metadata.framework === "springboot"
+        ? [`lce-${projectId}`, `lce-dev-${projectId}`]
+        : [`lce-${projectId}`];
+    for (const containerName of containerNames) {
+      await stopAndRemoveContainer(containerName);
+    }
+    return res.json({
+      success: true,
+      projectId,
+      framework: metadata.framework,
+      status: "stopped",
+    });
   } catch (error) {
     console.error("Failed to stop project:", error);
-    res.status(500).json({ success: false, projectId, error: "Unable to stop the project. Check Docker and the project container." });
+    return res.status(500).json({
+      success: false,
+      projectId,
+      error: "Unable to stop project.",
+    });
   }
 });
 
@@ -597,7 +656,7 @@ wss.on("connection", async (ws, req) => {
           const cols = Number(message.cols), rows = Number(message.rows);
           if (Number.isInteger(cols) && Number.isInteger(rows) && cols >= 20 && cols <= 240 && rows >= 5 && rows <= 100) terminal?.resize(cols, rows);
         }
-      } catch { /* Ignore malformed terminal messages. */ }
+      } catch { / Ignore malformed terminal messages. / }
     });
     ws.on("close", () => terminal?.kill());
     ws.on("error", () => terminal?.kill());
@@ -607,7 +666,6 @@ wss.on("connection", async (ws, req) => {
     terminal?.kill();
   }
 });
-
 // Consistent JSON errors for malformed JSON and rejected CORS requests.
 app.use((error, _req, res, _next) => {
   if (res.headersSent) return;
@@ -620,7 +678,6 @@ app.use((error, _req, res, _next) => {
   console.error("Unhandled request error:", error);
   return res.status(500).json({ success: false, error: "Internal server error." });
 });
-
 server.listen(PORT, HOST, () => {
   console.log(`Framework service listening on ${HOST}:${PORT}`);
   console.log(`Health endpoint: http://localhost:${PORT}/health`);
